@@ -2,47 +2,55 @@ const audio = document.getElementById('audio-player');
 const playBtn = document.getElementById('play-btn');
 const pauseBtn = document.getElementById('pause-btn');
 const stopBtn = document.getElementById('stop-btn');
+const prevBtn = document.getElementById('prev-btn');
+const nextBtn = document.getElementById('next-btn');
 const songList = document.getElementById('song-list');
 const currentSongDisplay = document.getElementById('current-song');
-const songTimeDisplay = document.getElementById('song-time');
+const currentTimeDisplay = document.getElementById('current-time');
+const totalTimeDisplay = document.getElementById('total-time');
 const progressBar = document.getElementById('progress');
-const progressContainer = document.querySelector('.progress-bar');
+const progressContainer = document.querySelector('.progress-container');
+const volumeSlider = document.getElementById('volume-slider');
+const albumArt = document.querySelector('.album-art');
+const songCount = document.getElementById('song-count');
 
 let songs = [];
 let currentSongIndex = -1;
 
 // Initialize the player
-document.addEventListener('DOMContentLoaded', loadSongs);
+document.addEventListener('DOMContentLoaded', () => {
+    loadSongs();
+    volumeSlider.value = 70;
+    audio.volume = 0.7;
+});
 
 // Control button events
 playBtn.addEventListener('click', playSong);
 pauseBtn.addEventListener('click', pauseSong);
 stopBtn.addEventListener('click', stopSong);
+prevBtn.addEventListener('click', previousSong);
+nextBtn.addEventListener('click', nextSong);
+volumeSlider.addEventListener('input', changeVolume);
 
 // Audio events
 audio.addEventListener('timeupdate', updateProgress);
 audio.addEventListener('ended', nextSong);
+audio.addEventListener('play', () => albumArt.classList.add('playing'));
+audio.addEventListener('pause', () => albumArt.classList.remove('playing'));
 
 // Progress bar click to seek
 progressContainer.addEventListener('click', seek);
 
 async function loadSongs() {
     try {
-        // Fetch songs from backend (you'll need to create a backend endpoint)
-        // For now, using mock data - replace with actual backend call
         const response = await fetch('/api/songs');
+        if (!response.ok) throw new Error('Failed to fetch songs');
         songs = await response.json();
-        
         renderSongList();
+        updateSongCount();
     } catch (error) {
-        console.log('Backend not available. Using demo mode.');
-        // Demo songs
-        songs = [
-            { id: 1, name: 'Song 1.mp3' },
-            { id: 2, name: 'Song 2.mp3' },
-            { id: 3, name: 'Song 3.mp3' }
-        ];
-        renderSongList();
+        console.error('Error loading songs:', error);
+        songList.innerHTML = '<p class="placeholder"><i class="fas fa-exclamation-circle"></i> Error loading songs. Make sure the backend is running.</p>';
     }
 }
 
@@ -50,7 +58,7 @@ function renderSongList() {
     songList.innerHTML = '';
     
     if (songs.length === 0) {
-        songList.innerHTML = '<p class="placeholder">No MP3 files found</p>';
+        songList.innerHTML = '<p class="placeholder"><i class="fas fa-music"></i> No MP3 files found</p>';
         return;
     }
 
@@ -69,7 +77,7 @@ function renderSongList() {
 
 function selectSong(index) {
     currentSongIndex = index;
-    audio.src = `/music/${songs[index].name}`;
+    audio.src = `/music/${encodeURIComponent(songs[index].name)}`;
     updateSongDisplay();
     playSong();
 }
@@ -80,7 +88,7 @@ function playSong() {
         return;
     }
     
-    audio.play();
+    audio.play().catch(err => console.error('Play error:', err));
     updateButtonStates(true);
 }
 
@@ -94,9 +102,20 @@ function stopSong() {
     audio.currentTime = 0;
     currentSongIndex = -1;
     currentSongDisplay.textContent = 'No song selected';
+    currentTimeDisplay.textContent = '00:00';
+    totalTimeDisplay.textContent = '00:00';
     progressBar.style.width = '0%';
     updateButtonStates(false);
     clearSongSelection();
+    albumArt.classList.remove('playing');
+}
+
+function previousSong() {
+    if (currentSongIndex > 0) {
+        selectSong(currentSongIndex - 1);
+    } else if (songs.length > 0) {
+        selectSong(songs.length - 1);
+    }
 }
 
 function nextSong() {
@@ -112,7 +131,8 @@ function updateProgress() {
         const percent = (audio.currentTime / audio.duration) * 100;
         progressBar.style.width = percent + '%';
         
-        songTimeDisplay.textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+        currentTimeDisplay.textContent = formatTime(audio.currentTime);
+        totalTimeDisplay.textContent = formatTime(audio.duration);
     }
 }
 
@@ -120,6 +140,10 @@ function seek(e) {
     const rect = progressContainer.getBoundingClientRect();
     const percent = (e.clientX - rect.left) / rect.width;
     audio.currentTime = percent * audio.duration;
+}
+
+function changeVolume(e) {
+    audio.volume = e.target.value / 100;
 }
 
 function updateSongDisplay() {
@@ -134,6 +158,8 @@ function updateButtonStates(isPlaying) {
     playBtn.disabled = isPlaying;
     pauseBtn.disabled = !isPlaying;
     stopBtn.disabled = currentSongIndex === -1;
+    prevBtn.disabled = songs.length === 0;
+    nextBtn.disabled = songs.length === 0;
 }
 
 function clearSongSelection() {
@@ -147,4 +173,8 @@ function formatTime(seconds) {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
+function updateSongCount() {
+    songCount.textContent = `${songs.length} ${songs.length === 1 ? 'song' : 'songs'}`;
 }

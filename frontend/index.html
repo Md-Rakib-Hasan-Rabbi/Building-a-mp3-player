@@ -4,41 +4,91 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MP3 Player</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    <script src="script.js"></script>
 </head>
 <body>
-    <div class="player-container">
-        <div class="player-header">
-            <h1>🎵 MP3 PLAYER</h1>
-        </div>
-
-        <div class="player-display">
-            <div class="song-info">
-                <h2 id="current-song">No song selected</h2>
-                <p id="song-time">00:00 / 00:00</p>
+    <div class="player-wrapper">
+        <div class="player-container">
+            <!-- Header -->
+            <div class="player-header">
+                <div class="header-content">
+                    <h1><i class="fas fa-music"></i> MP3 PLAYER</h1>
+                    <p class="subtitle">Your Music, Your Way</p>
+                </div>
             </div>
-            <div class="progress-bar">
-                <div id="progress" class="progress-fill"></div>
+
+            <!-- Album Art & Song Display -->
+            <div class="album-art-section">
+                <div class="album-art">
+                    <i class="fas fa-compact-disc"></i>
+                </div>
+                <div class="song-info">
+                    <h2 id="current-song">No song selected</h2>
+                    <p id="song-artist">Unknown Artist</p>
+                </div>
+            </div>
+
+            <!-- Progress Section -->
+            <div class="progress-section">
+                <div class="time-display">
+                    <span id="current-time">00:00</span>
+                    <span class="separator">•</span>
+                    <span id="total-time">00:00</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div id="progress" class="progress-fill"></div>
+                        <div class="progress-handle"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls">
+                <button id="prev-btn" class="control-btn prev-btn" title="Previous">
+                    <i class="fas fa-step-backward"></i>
+                </button>
+                <button id="play-btn" class="control-btn play-btn" disabled title="Play">
+                    <i class="fas fa-play"></i>
+                </button>
+                <button id="pause-btn" class="control-btn pause-btn" disabled title="Pause">
+                    <i class="fas fa-pause"></i>
+                </button>
+                <button id="stop-btn" class="control-btn stop-btn" disabled title="Stop">
+                    <i class="fas fa-stop"></i>
+                </button>
+                <button id="next-btn" class="control-btn next-btn" title="Next">
+                    <i class="fas fa-step-forward"></i>
+                </button>
+            </div>
+
+            <!-- Volume Control -->
+            <div class="volume-section">
+                <i class="fas fa-volume-down"></i>
+                <input type="range" id="volume-slider" class="volume-slider" min="0" max="100" value="70" title="Volume">
+                <i class="fas fa-volume-up"></i>
+            </div>
+
+            <!-- Playlist -->
+            <div class="playlist-section">
+                <div class="playlist-header">
+                    <h3><i class="fas fa-list"></i> Playlist</h3>
+                    <span id="song-count" class="song-count">0 songs</span>
+                </div>
+                <div id="song-list" class="song-list">
+                    <p class="placeholder"><i class="fas fa-spinner fa-spin"></i> Loading songs...</p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="player-footer">
+                <p>🎵 Enjoy your music! 🎵</p>
             </div>
         </div>
-
-        <div class="playlist">
-            <h3>My Song List</h3>
-            <div id="song-list" class="song-list">
-                <p class="placeholder">Loading songs...</p>
-            </div>
-        </div>
-
-        <div class="controls">
-            <button id="play-btn" class="control-btn" disabled>▶ Play</button>
-            <button id="pause-btn" class="control-btn" disabled>⏸ Pause</button>
-            <button id="stop-btn" class="control-btn" disabled>⏹ Stop</button>
-        </div>
-
-        <audio id="audio-player" crossorigin="anonymous"></audio>
     </div>
 
+    <audio id="audio-player" crossorigin="anonymous"></audio>
     <script src="script.js"></script>
 </body>
 </html>
